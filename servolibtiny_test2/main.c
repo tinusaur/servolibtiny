@@ -27,7 +27,7 @@
 // --------(-)---+ GND  PB0 +-------------
 //               +----------+
 //                 Tinusaur
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //    SG90 - Tower Pro, Micro Servo, 9g
 //          +---+              +------+
 //    PWM --+ o +----Orange----+      |
@@ -39,16 +39,16 @@
 // Define the I/O port to be used for the SERVO.
 #define SERVO_PORT PB1
 
-#define SERVO_POS_MIN -100	// Should be 0
+#define SERVO_POS_MIN 0	// Should be 0
 #define SERVO_POS_MID 125	// Should be 125
-#define SERVO_POS_MAX 350	// Should be 250
+#define SERVO_POS_MAX 250	// Should be 250
 
 // ----------------------------------------------------------------------------
 
 int main(void) {
 
 	// ---- Initialization ----
-	servolibtiny_resel(0, SERVO_PORT, 1);	// Select servo and init port.
+	servolibtiny_resel(0, SERVO_PORT);	// Select servo and init port.
 
 	// ---- Main Loop ----
 	servolibtiny_repos(SERVO_POS_MID);

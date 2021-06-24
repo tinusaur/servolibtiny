@@ -28,16 +28,16 @@
 // TODO: Add global variable for the pulse_count value and initialize it in the _init() function.
 
 static uint8_t servolibtiny_servo_port;
-static uint8_t servolibtiny_pulse_count;
+// static uint8_t servolibtiny_pulse_count;
 
 // ----------------------------------------------------------------------------
 
 // Select the active servo port, inti the port, set pulse count.
-void servolibtiny_sel(uint8_t servo_port, uint8_t pulse_count) {
+void servolibtiny_sel(uint8_t servo_port) {
 	servolibtiny_servo_port = servo_port;
 	DDRB |= (1 << servo_port); // Set the port as output.
 	PORTB &= ~(1 << servo_port); // Set port to LOW
-	servolibtiny_pulse_count = pulse_count;
+	// servolibtiny_pulse_count = pulse_count;
 }
 
 #define SERVOLIBTINY_SIGNAL_PERIOD 4980 // Should be 4980(5010) for 20 mS pulse period.
@@ -50,9 +50,9 @@ void servolibtiny_sel(uint8_t servo_port, uint8_t pulse_count) {
 // - at servo_pos=0 the pulse should be 1+19=20 mS
 // - at servo_pos=125 the pulse should be 1.5+18.5=20 mS
 // - at servo_pos=250 the pulse should be 2+18=20 mS
-void servolibtiny_set(uint8_t servo_port, int16_t servo_pos) {
+void servolibtiny_set(uint8_t servo_port, int16_t servo_pos, uint8_t pulse_count) {
 	int16_t pulse_length = SERVOLIBTINY_PULSE_MIN + servo_pos;
-	for (uint8_t pulse_count = servolibtiny_pulse_count; pulse_count > 0; pulse_count--) {
+	for (; pulse_count > 0; pulse_count--) {
 		// Loop to repeat (pulse_count times) the pulse - to reach the position.
 		PORTB |= (1 << servo_port);
 		_delay_loop_2(pulse_length); // Signal - Pulse
@@ -63,8 +63,8 @@ void servolibtiny_set(uint8_t servo_port, int16_t servo_pos) {
 
 // Set servo position specifying only the servo_pos, and
 // using servo_port & pulse_count set by the servolibtiny_sel().
-void servolibtiny_pos(int16_t servo_pos) {
-	servolibtiny_set(servolibtiny_servo_port, servo_pos);
+void servolibtiny_pos(int16_t servo_pos, uint8_t pulse_count) {
+	servolibtiny_set(servolibtiny_servo_port, servo_pos, pulse_count);
 }
 
 // ----------------------------------------------------------------------------
@@ -76,9 +76,9 @@ void servolibtiny_pos(int16_t servo_pos) {
 static uint8_t servolibtiny_servo_index;
 static int16_t servolibtiny_servo_poss[4];
 
-void servolibtiny_resel(uint8_t servo_index, uint8_t servo_port, uint8_t pulse_count) {
+void servolibtiny_resel(uint8_t servo_index, uint8_t servo_port) {
 	servolibtiny_servo_index = servo_index;
-	servolibtiny_sel(servo_port, pulse_count);
+	servolibtiny_sel(servo_port);
 }
 
 int16_t servolibtiny_getpos(void) {
@@ -95,7 +95,7 @@ void servolibtiny_repos(int16_t servo_pos) {
 		} else {
 			pos--;
 		}
-		servolibtiny_pos(pos);
+		servolibtiny_pos(pos, 1);
 	}
 	// TODO: array index bound check.
 	servolibtiny_servo_poss[servolibtiny_servo_index] = servo_pos;

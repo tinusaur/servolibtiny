@@ -21,10 +21,10 @@
 
 // ----------------------------------------------------------------------------
 
-void servolibtiny_sel(uint8_t servo_port, uint8_t pulse_count);
-void servolibtiny_pos(int16_t servo_pos);
+void servolibtiny_sel(uint8_t servo_port);
+void servolibtiny_pos(int16_t servo_pos, uint8_t pulse_count);
 
-void servolibtiny_resel(uint8_t servo_index, uint8_t servo_port, uint8_t pulse_count);
+void servolibtiny_resel(uint8_t servo_index, uint8_t servo_port);
 int16_t servolibtiny_getpos(void);
 void servolibtiny_repos(int16_t servo_pos);
 
