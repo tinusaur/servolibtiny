@@ -28,7 +28,6 @@
 // TODO: Add global variable for the pulse_count value and initialize it in the _init() function.
 
 static uint8_t servolibtiny_servo_port;
-// static uint8_t servolibtiny_pulse_count;
 
 // ----------------------------------------------------------------------------
 
@@ -37,7 +36,6 @@ void servolibtiny_sel(uint8_t servo_port) {
 	servolibtiny_servo_port = servo_port;
 	DDRB |= (1 << servo_port); // Set the port as output.
 	PORTB &= ~(1 << servo_port); // Set port to LOW
-	// servolibtiny_pulse_count = pulse_count;
 }
 
 #define SERVOLIBTINY_SIGNAL_PERIOD 4980 // Should be 4980(5010) for 20 mS pulse period.
