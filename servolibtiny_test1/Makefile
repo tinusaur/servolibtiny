@@ -2,7 +2,7 @@
 # Makefile
 #
 # -----------------------------------------------------------------------------
-# Copyright (c) 2021 Tinusaur (https://tinusaur.com). All rights reserved.
+# Copyright (c) 2022 Tinusaur (https://tinusaur.com). All rights reserved.
 # Distributed as open source under the MIT License (see the LICENSE.txt file).
 # Please, retain in your work a link to the Tinusaur project website.
 # -----------------------------------------------------------------------------
@@ -49,9 +49,6 @@
 #
 # make program = Download the hex file to the device, using avrdude.
 #                Please customize the avrdude settings below first!
-#
-# make debug = Start either simulavr or avarice as specified for debugging, 
-#              with avr-gdb or avr-insight as the front end for debugging.
 #
 # make filename.s = Just compile filename.c into the assembler code only.
 #
@@ -105,7 +102,7 @@ EXTLIBSDIR = ../
 # Source files
 #	Add external libraries source code files here
 EXTLIBSOURCES = servolibtiny/servolibtiny.c 
-# OWOWOD: owowod/owowod.c tinyavrlib/num2str.c
+
 #
 # Construct list of external libraries source files:
 #	DO NOT edit this line
@@ -163,11 +160,17 @@ EXTRAINCDIRS = ../
 
 
 # Compiler flag to set the C Standard level.
+# REF: https://gcc.gnu.org/onlinedocs/gcc/Standards.html
 #     c89   = "ANSI" C
 #     gnu89 = c89 plus GCC extensions
-#     c99   = ISO C99 standard (not yet fully implemented)
+#     c99   = ISO C99 standard
 #     gnu99 = c99 plus GCC extensions
-CSTANDARD = -std=gnu99
+#	  c11   = ISO C11 standard
+#	  gnu11 = C11 with GNU extensions
+#	  c17   = ISO C17 standard
+#	  gnu17 = C17 with GNU extensions
+#	  c2x   = C2X (?)
+CSTANDARD = -std=gnu11
 
 
 # Place -D or -U options here for C sources
@@ -182,7 +185,6 @@ ADEFS = -DF_CPU=$(F_CPU)
 CPPDEFS = -DF_CPU=$(F_CPU)UL
 #CPPDEFS += -D__STDC_LIMIT_MACROS
 #CPPDEFS += -D__STDC_CONSTANT_MACROS
-
 
 
 #---------------- Compiler Options C ----------------
@@ -285,7 +287,6 @@ MATH_LIB = -lm
 EXTRALIBDIRS = 
 
 
-
 #---------------- External Memory Options ----------------
 
 # 64 KB of external RAM, starting after internal RAM (ATmega128!),
@@ -299,7 +300,6 @@ EXTRALIBDIRS =
 EXTMEMOPTS =
 
 
-
 #---------------- Linker Options ----------------
 #  -Wl,...:     tell GCC to pass this to linker.
 #    -Map:      create map file
@@ -309,7 +309,6 @@ LDFLAGS += $(EXTMEMOPTS)
 LDFLAGS += $(patsubst %,-L%,$(EXTRALIBDIRS))
 LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 #LDFLAGS += -T linker_script.x
-
 
 
 #---------------- Programming Options (avrdude) ----------------
@@ -329,6 +328,10 @@ AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex:a
 
 #AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(TARGET).eep
 
+# Specify the bit clock period. The value is a floating-point number in microseconds.
+# This also fixes issues with some (slower or outdated firmware) USBasp programmers.
+AVRDUDE_BIT_CLOCK_PERIOD = -B 3
+
 # Uncomment the following if you want avrdude's erase cycle counter.
 # Note that this counter needs to be initialized first using -Yn,
 # see avrdude manual.
@@ -344,39 +347,10 @@ AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex:a
 #AVRDUDE_VERBOSE = -v -v
 
 AVRDUDE_FLAGS = -p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
+AVRDUDE_FLAGS += $(AVRDUDE_BIT_CLOCK_PERIOD)
 AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
-
-
-
-#---------------- Debugging Options ----------------
-
-# For simulavr only - target MCU frequency.
-DEBUG_MFREQ = $(F_CPU)
-
-# Set the DEBUG_UI to either gdb or insight.
-# DEBUG_UI = gdb
-DEBUG_UI = insight
-
-# Set the debugging back-end to either avarice, simulavr.
-DEBUG_BACKEND = avarice
-#DEBUG_BACKEND = simulavr
-
-# GDB Init Filename.
-GDBINIT_FILE = __avr_gdbinit
-
-# When using avarice settings for the JTAG
-JTAG_DEV = /dev/com1
-
-# Debugging port used to communicate between GDB / avarice / simulavr.
-DEBUG_PORT = 4242
-
-# Debugging host used to communicate between GDB / avarice / simulavr, normally
-#     just set to localhost unless doing some sort of crazy debugging when 
-#     avarice is running on a different computer.
-DEBUG_HOST = localhost
-
 
 
 #============================================================================
@@ -395,7 +369,6 @@ REMOVE = rm -f
 REMOVEDIR = rm -rf
 MAKEDIR = mkdir
 COPY = cp
-WINSHELL = cmd
 
 
 # Define Messages
@@ -420,7 +393,6 @@ MSG_CREATING_LIBRARY = Creating library:
 
 
 
-
 # Define all object files.
 OBJ = $(SRC:%.c=$(OBJDIR)/%.o) $(CPPSRC:%.cpp=$(OBJDIR)/%.o) $(ASRC:%.S=$(OBJDIR)/%.o) 
 
@@ -437,8 +409,6 @@ GENDEPFLAGS = -MMD -MP -MF $(DEPDIR)/$(@F).d
 ALL_CFLAGS = -mmcu=$(MCU) -I. $(CFLAGS) $(GENDEPFLAGS)
 ALL_CPPFLAGS = -mmcu=$(MCU) -I. -x c++ $(CPPFLAGS) $(GENDEPFLAGS)
 ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
-
-
 
 
 
@@ -468,7 +438,6 @@ lib: $(LIBNAME)
 begin:
 	@echo
 	@echo $(MSG_BEGIN)
-#	@echo EXTLIBS: $(EXTLIBS)
 
 end:
 	@echo $(MSG_END)
@@ -491,47 +460,14 @@ sizeafter:
 #	$(ELFSIZE)
 
 
-
 # Display compiler version information.
-gccversion : 
+gccversion:
 	@$(CC) --version
-
 
 
 # Program the device.  
 program: $(TARGET).hex $(TARGET).eep
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH) $(AVRDUDE_WRITE_EEPROM)
-
-
-# Generate avr-gdb config/init file which does the following:
-#     define the reset signal, load the target file, connect to target, and set 
-#     a breakpoint at main().
-gdb-config: 
-	@$(REMOVE) $(GDBINIT_FILE)
-	@echo define reset >> $(GDBINIT_FILE)
-	@echo SIGNAL SIGHUP >> $(GDBINIT_FILE)
-	@echo end >> $(GDBINIT_FILE)
-	@echo file $(TARGET).elf >> $(GDBINIT_FILE)
-	@echo target remote $(DEBUG_HOST):$(DEBUG_PORT)  >> $(GDBINIT_FILE)
-ifeq ($(DEBUG_BACKEND),simulavr)
-	@echo load  >> $(GDBINIT_FILE)
-endif
-	@echo break main >> $(GDBINIT_FILE)
-
-debug: gdb-config $(TARGET).elf
-ifeq ($(DEBUG_BACKEND), avarice)
-	@echo Starting AVaRICE - Press enter when "waiting to connect" message displays.
-	@$(WINSHELL) /c start avarice --jtag $(JTAG_DEV) --erase --program --file \
-	$(TARGET).elf $(DEBUG_HOST):$(DEBUG_PORT)
-	@$(WINSHELL) /c pause
-
-else
-	@$(WINSHELL) /c start simulavr --gdbserver --device $(MCU) --clock-freq \
-	$(DEBUG_MFREQ) --port $(DEBUG_PORT)
-endif
-	@$(WINSHELL) /c start avr-$(DEBUG_UI) --command=$(GDBINIT_FILE)
-
-
 
 
 # Convert ELF to COFF for use in debugging / simulating in AVR Studio or VMLAB.
@@ -540,7 +476,6 @@ COFFCONVERT += --change-section-address .data-0x800000
 COFFCONVERT += --change-section-address .bss-0x800000
 COFFCONVERT += --change-section-address .noinit-0x800000
 COFFCONVERT += --change-section-address .eeprom-0x810000
-
 
 
 coff: $(TARGET).elf
@@ -553,7 +488,6 @@ extcoff: $(TARGET).elf
 	@echo
 	@echo $(MSG_EXTENDED_COFF) $(TARGET).cof
 	$(COFFCONVERT) -O coff-ext-avr $< $(TARGET).cof
-
 
 
 # Create final output files (.hex, .eep) from ELF output file.
@@ -579,7 +513,6 @@ extcoff: $(TARGET).elf
 	@echo
 	@echo $(MSG_SYMBOL_TABLE) $@
 	$(NM) -n $< > $@
-
 
 
 # Create library from object files.
@@ -639,7 +572,7 @@ $(OBJDIR)/%.o : %.S
 # Target: clean project.
 clean: begin clean_list end
 
-clean_list :
+clean_list:
 	@echo
 	@echo $(MSG_CLEANING)
 	$(REMOVE) $(TARGET).hex
@@ -668,6 +601,5 @@ $(shell mkdir $(OBJDIR) 2>/dev/null)
 # Listing of phony targets.
 .PHONY : all begin finish end sizebefore sizeafter gccversion \
 build elf hex eep lss sym coff extcoff \
-clean clean_list program debug gdb-config
-
+clean clean_list program
 

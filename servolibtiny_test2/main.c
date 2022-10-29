@@ -38,10 +38,9 @@
 
 // Define the I/O port to be used for the SERVO.
 #define SERVO_PORT PB1
-
-#define SERVO_POS_MIN 0	// Should be 0
-#define SERVO_POS_MID 125	// Should be 125
-#define SERVO_POS_MAX 250	// Should be 250
+#define SERVO_POS_MIN   0		// Should be   0	(min: -100)
+#define SERVO_POS_MID 125		// Should be 125
+#define SERVO_POS_MAX 250		// Should be 250	(max: 350)
 
 // ----------------------------------------------------------------------------
 

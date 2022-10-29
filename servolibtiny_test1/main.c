@@ -38,23 +38,25 @@
 
 // Define the I/O port to be used for the SERVO.
 #define SERVO_PORT PB1
+#define SERVO_POS_MIN   0		// Should be   0	(min: -100)
+#define SERVO_POS_MID 125		// Should be 125
+#define SERVO_POS_MAX 250		// Should be 250	(max: 350)
 #define SERVO_PULSE_COUNT 50
 
 // ----------------------------------------------------------------------------
 
 int main(void) {
-
 	// ---- Initialization ----
 	servolibtiny_sel(SERVO_PORT);	// Select servo and init port.
-
 	// ---- Main Loop ----
 	for (;;) { // The infinite main loop
-		servolibtiny_pos(0, SERVO_PULSE_COUNT);	// Set servo in "0" position
+		servolibtiny_pos(SERVO_POS_MIN, SERVO_PULSE_COUNT);	// Set servo in "0" position
 		_delay_ms(200);
-		servolibtiny_pos(250, SERVO_PULSE_COUNT);	// Set servo in "90" position
+		servolibtiny_pos(SERVO_POS_MID, SERVO_PULSE_COUNT);	// Set servo in "mid" position
+		_delay_ms(200);
+		servolibtiny_pos(SERVO_POS_MAX, SERVO_PULSE_COUNT);	// Set servo in "90" position
 		_delay_ms(200);
 	}
-
 	return 0; // Return the mandatory for the "main" function int value - "0" for success.
 }
 
